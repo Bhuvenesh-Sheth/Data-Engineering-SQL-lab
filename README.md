@@ -60,6 +60,4 @@ Solve SQL problems daily and gradually move from beginner to advanced level.
 
 Bhuvenesh Sheth
 Data Engineer
-Bhuvenesh Sheth  
-Aspiring Data Engineer  
 India

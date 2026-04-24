@@ -110,3 +110,136 @@ HAVING AVG(e.salary) > 60000;
 -- 💡 FROM subquery = temporary table!
 --    Always give it an alias (AS ds)!
 --    Write inner query first, test it, then wrap!
+
+
+-- Q: Which departments have at least one active project?
+
+-- ❌ My attempt (tiny typo!)
+SELECT * FROM departments d
+WHERE exist (
+    SELECT 1 FROM projects p
+    WHERE p.dept_id = d.dept_id
+);
+
+-- ✅ Correct version
+SELECT d.dept_name
+FROM departments d
+WHERE EXISTS (
+    SELECT 1 FROM projects p     -- SELECT 1 = fastest!
+    WHERE p.dept_id = d.dept_id  -- correlated link!
+);
+
+-- ✅ Bonus: NOT EXISTS (flip it!)
+SELECT d.dept_name
+FROM departments d
+WHERE NOT EXISTS (
+    SELECT 1 FROM projects p
+    WHERE p.dept_id = d.dept_id
+);
+
+-- 💡 Why SELECT 1 inside EXISTS?
+--    EXISTS only checks IF row exists
+--    Doesn't care WHAT the row contains
+--    SELECT 1 is fastest — professional standard!
+
+-- 💡 EXISTS vs IN performance:
+--    EXISTS stops at FIRST match (faster!)
+--    IN collects ALL values then compares (slower!)
+--    Large datasets → always prefer EXISTS!
+
+-- Q: Show employees earning MORE than
+--    their own department's average salary.
+
+-- ❌ My attempt (missing FROM clause!)
+SELECT e1.emp_id, e1.name, e1.salary
+WHERE e1.salary > (
+    SELECT AVG(salary)
+    FROM employees e2
+    WHERE e2.dept_id = e1.dept_id
+);
+
+-- ✅ Correct version
+SELECT e1.emp_id, e1.name, e1.salary
+FROM employees e1                    -- was missing!
+WHERE e1.salary > (
+    SELECT AVG(salary)
+    FROM employees e2
+    WHERE e2.dept_id = e1.dept_id    -- correlated link!
+);
+
+-- ✅ With department name (interview bonus!)
+SELECT e1.name, e1.salary, d.dept_name
+FROM employees e1
+JOIN departments d ON e1.dept_id = d.dept_id
+WHERE e1.salary > (
+    SELECT AVG(salary)
+    FROM employees e2
+    WHERE e2.dept_id = e1.dept_id
+);
+
+-- 💡 Correlated subquery runs ONCE PER ROW!
+--    Inner query references outer query's column
+--    e2.dept_id = e1.dept_id is the correlation key!
+--    e1 = outer (employee being checked)
+--    e2 = inner (all employees for avg calculation)
+
+
+-- Q: Show each employee name AND their department name
+--    using a subquery NOT a JOIN.
+
+-- ❌ My attempt (subquery in WHERE not SELECT!)
+SELECT e.name, d.dept_name, e.dept_id
+FROM employees e
+WHERE e.dept_id = (
+    SELECT d.dept_id FROM departments
+    WHERE d.dept_id = e.dept_id
+);
+
+-- ✅ Correct version (subquery inside SELECT!)
+SELECT
+    e.name,
+    e.dept_id,
+    (SELECT d.dept_name
+     FROM departments d
+     WHERE d.dept_id = e.dept_id) AS dept_name
+FROM employees e;
+
+-- 💡 Three subquery placements:
+-- WHERE  → filters rows using subquery result
+-- FROM   → uses subquery as temporary table
+-- SELECT → fetches ONE value per row via subquery
+
+-- ⚠️ SELECT subquery must return exactly 1 row!
+--    More than 1 row = error! 💥
+
+
+-- Q: Find the department with HIGHEST total salary budget.
+--    No LIMIT allowed — subquery only!
+
+-- ✅ Correct version (Pure Subquery — works everywhere!)
+SELECT d.dept_name, SUM(e.salary) AS total_salary
+FROM employees e
+JOIN departments d ON e.dept_id = d.dept_id
+GROUP BY d.dept_name
+HAVING SUM(e.salary) = (
+    SELECT MAX(total_salary)
+    FROM (
+        SELECT SUM(salary) AS total_salary
+        FROM employees
+        GROUP BY dept_id
+    ) AS dt
+);
+
+-- ✅ Simpler version (ORDER BY + LIMIT)
+SELECT d.dept_name, SUM(e.salary) AS total_salary
+FROM employees e
+JOIN departments d ON e.dept_id = d.dept_id
+GROUP BY d.dept_name
+ORDER BY total_salary DESC
+LIMIT 1;
+
+-- 💡 Step by step thinking:
+-- Step 1 → SUM salaries GROUP BY department
+-- Step 2 → Find MAX of those sums (subquery)
+-- Step 3 → Match back to get department name
+-- Always break Boss Battles into steps! 🎯

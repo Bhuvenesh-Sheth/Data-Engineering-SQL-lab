@@ -1,0 +1,15 @@
+-- Q: Show employees earning MORE than company average salary.
+
+-- ❌ My attempt (AVG can't be used directly in WHERE!)
+SELECT name, salary
+FROM employees
+WHERE salary > AVG(salary);
+
+-- ✅ Correct version
+SELECT name, salary
+FROM employees
+WHERE salary > (SELECT AVG(salary) FROM employees);
+
+-- 💡 Why: At WHERE stage, SQL hasn't calculated AVG yet!
+--         Subquery runs FIRST, returns the number,
+--         THEN WHERE compares against it!

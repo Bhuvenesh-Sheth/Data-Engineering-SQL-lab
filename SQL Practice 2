@@ -81,3 +81,32 @@ WHERE NOT EXISTS (
 -- Small data  → NOT IN (readable)
 -- Large data  → LEFT JOIN IS NULL (fastest!)
 -- Interviews  → NOT EXISTS (shows expertise!)
+
+-- Q: Show average salary per department
+--    only where avg salary is above 60,000.
+
+-- ❌ My attempt (wrong concept used!)
+SELECT * FROM departments d
+WHERE salary > (SELECT SUM(salary) FROM employees)
+GROUP BY departments;
+
+-- ✅ Correct version (FROM Subquery)
+SELECT d.dept_name, ds.avg_sal
+FROM departments d
+JOIN (
+    SELECT dept_id, AVG(salary) AS avg_sal
+    FROM employees
+    GROUP BY dept_id
+) AS ds ON d.dept_id = ds.dept_id
+WHERE ds.avg_sal > 60000;
+
+-- ✅ Cleaner alternative (HAVING clause)
+SELECT d.dept_name, AVG(e.salary) AS avg_sal
+FROM departments d
+JOIN employees e ON d.dept_id = e.dept_id
+GROUP BY d.dept_name
+HAVING AVG(e.salary) > 60000;
+
+-- 💡 FROM subquery = temporary table!
+--    Always give it an alias (AS ds)!
+--    Write inner query first, test it, then wrap!

@@ -13,3 +13,31 @@ WHERE salary > (SELECT AVG(salary) FROM employees);
 -- 💡 Why: At WHERE stage, SQL hasn't calculated AVG yet!
 --         Subquery runs FIRST, returns the number,
 --         THEN WHERE compares against it!
+
+-- Q: Show employees working in departments located in Pune.
+
+-- ❌ My attempt (wrong operators!)
+SELECT e.name, d.dept_name
+FROM employees e
+WHERE e.dept_id == d.dept_id
+&& d.location = 'Pune';
+
+-- ✅ Correct version (Subquery approach)
+SELECT e.name
+FROM employees e
+WHERE e.dept_id IN (
+    SELECT dept_id
+    FROM departments
+    WHERE location = 'Pune'
+);
+
+-- ✅ Alternative (JOIN approach)
+SELECT e.name, d.dept_name
+FROM employees e
+JOIN departments d ON e.dept_id = d.dept_id
+WHERE d.location = 'Pune';
+
+-- 💡 SQL vs Other Languages:
+-- ==   →  =      (single equals in SQL)
+-- &&   →  AND    (keyword not symbol)
+-- ||   →  OR     (keyword not symbol)

@@ -1,5 +1,5 @@
-1) Generate a report of all Hindi movies sorted by their revenue amount in millions. 
-Print movie name, revenue, currency, and unit
+/*1) Generate a report of all Hindi movies sorted by their revenue amount in millions. 
+Print movie name, revenue, currency, and unit*/
 
 	SELECT 
 		title, revenue, currency, unit, 

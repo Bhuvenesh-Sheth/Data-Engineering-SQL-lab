@@ -1,4 +1,4 @@
-1) Print profit % for all the movies 
+--1) Print profit % for all the movies 
    
    select 
         *, 

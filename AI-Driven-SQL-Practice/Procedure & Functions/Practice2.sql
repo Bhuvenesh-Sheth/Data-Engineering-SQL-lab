@@ -406,3 +406,38 @@ ORDER BY exp_years DESC;
 -- Without quotes: 2024-04-02 = math = 2018! 😱
 -- 365.25 more accurate than 365 for leap years!
 -- NOT DETERMINISTIC when CURDATE() used inside!
+
+/*Q7 — Procedure + Function Combined | 60 XP 
+Scenario: "Create a function for bonus calculation (10%). Then create a procedure that shows all employees with their
+name, salary, bonus amount!"*/
+
+-- STEP 1: Create function first!
+DELIMITER $$
+    
+CREATE FUNCTION get_emp_bonus(p_salary DECIMAL(10,2))
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE emp_bonus DECIMAL(10,2);
+    SET emp_bonus = ROUND(p_salary * 0.10, 2);
+    RETURN emp_bonus;
+END $$
+
+DELIMITER ;
+
+-- STEP 2: Create procedure that USES function!
+DELIMITER $$
+
+CREATE PROCEDURE all_emp_bonus()    -- no OUT needed!
+BEGIN
+    SELECT
+        e.name                        AS employee_name,
+        e.salary                      AS salary,
+        get_emp_bonus(e.salary)       AS bonus_amount
+    FROM employees e;                 -- function called here!
+END $$                                -- ✅ END $$ present!
+
+DELIMITER ;                           -- ✅ space!
+
+-- STEP 3: Call it!
+CALL all_emp_bonus();                 -- ✅ semicolon!

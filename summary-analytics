@@ -16,3 +16,15 @@
 
    select release_year, count(*) as movies_count 
    from movies group by release_year order by release_year desc
+
+
+
+```sql
+-- Q: Show all employee names with their department names.
+
+SELECT e.name, d.dept_name 
+FROM employees e 
+JOIN departments d ON e.dept_id = d.dept_id;
+```
+
+---

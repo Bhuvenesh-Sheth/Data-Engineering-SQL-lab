@@ -148,5 +148,16 @@ LEFT JOIN p.dept_id = d.dept_id;
 SELECT c.client_name, p.project_name, d.dept_name
 FROM clients c
 LEFT JOIN projects p ON c.project_id = p.project_id
+
+  
+```sql
+-- Q: Show all employee names with their department names.
+
+SELECT e.name, d.dept_name 
+FROM employees e 
+JOIN departments d ON e.dept_id = d.dept_id;
+```
+
+---
 LEFT JOIN departments d ON p.dept_id = d.dept_id;
 

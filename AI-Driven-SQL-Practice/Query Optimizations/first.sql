@@ -63,3 +63,24 @@ SELECT
 FROM pune_employees p
 JOIN monthly_sales m ON p.emp_id = m.emp_id;
 
+-- ============================================
+-- Q4: IN vs EXISTS (with correct correlation!)
+-- ============================================
+
+-- Original IN query:
+-- SELECT emp_name, salary FROM employees
+-- WHERE emp_id IN (SELECT emp_id FROM monthly_sales
+--                  WHERE sales_amount > 50000);
+
+-- Optimized with EXISTS:
+-- EXISTS is faster because it stops at first match
+-- IN loads entire subquery result into memory first
+SELECT e.emp_name, e.salary
+FROM employees e
+WHERE EXISTS (
+    SELECT 1
+    FROM monthly_sales m
+    WHERE m.emp_id = e.emp_id          -- correlated condition!
+    AND m.sales_amount > 50000
+);
+

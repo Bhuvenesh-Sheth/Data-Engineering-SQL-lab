@@ -40,3 +40,26 @@ EXPLAIN SELECT emp_id, emp_name, join_date
 FROM employees
 WHERE join_date BETWEEN '2023-01-01' AND '2023-12-31';
 
+-- ============================================
+-- Q3: FILTER BEFORE JOIN USING CTE
+-- ============================================
+
+-- Original slow query:
+-- SELECT * FROM employees e
+-- JOIN monthly_sales m ON e.emp_id = m.emp_id
+-- WHERE e.city = 'Pune';
+
+-- Optimized: filter employees first, then join smaller set
+WITH pune_employees AS (
+    SELECT emp_id, emp_name, department, city
+    FROM employees
+    WHERE city = 'Pune'
+)
+SELECT
+    p.emp_name,
+    p.department,
+    m.month_name,
+    m.sales_amount
+FROM pune_employees p
+JOIN monthly_sales m ON p.emp_id = m.emp_id;
+
